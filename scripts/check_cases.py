@@ -7,7 +7,9 @@ Usage:
 
 Project mode collects the current (highest version) '-用例-v<N>.csv' of every
 task directory, reads '<项目目录>/retired-ids.csv' to excuse numbering gaps and
-judges method/type coverage on the full set. Single file mode only warns about
+judges method/type coverage on the full set. It also warns when
+'<项目目录>/project-info.md' is missing and when the project directory root holds
+anything other than task directories, retired-ids.csv and project-info.md. Single file mode only warns about
 method/type coverage. Both modes run a reverse coverage check against the
 traceability matrix in the '-测试分析说明-v<N>.md' file when one is found.
 """
@@ -32,6 +34,8 @@ P0_WARN_MODULE = 50.0
 CASE_FILE_RE = re.compile(r"-用例-v(\d+)\.csv$")
 ANALYSIS_FILE_RE = re.compile(r"-测试分析说明-v(\d+)\.md$")
 RETIRED_FILE = "retired-ids.csv"
+PROJECT_INFO_FILE = "project-info.md"
+PROJECT_ROOT_FILES = (RETIRED_FILE, PROJECT_INFO_FILE)
 SKIP_MARKS = ("缺UI稿", "缺接口文档")
 EMPTY_MARKS = ("", "-", "—", "无", "N/A", "n/a")
 
@@ -171,15 +175,25 @@ def main():
         retired = read_retired(os.path.join(target, RETIRED_FILE))
         if retired is None:
             warnings.append(f"{RETIRED_FILE} missing or unreadable in the project directory")
+        if not os.path.isfile(os.path.join(target, PROJECT_INFO_FILE)):
+            warnings.append(f"{PROJECT_INFO_FILE} missing in the project directory "
+                            "(create it from references/project-info-template.md)")
+        stray = []
         for name in sorted(os.listdir(target)):
             d = os.path.join(target, name)
             if not os.path.isdir(d):
+                if name not in PROJECT_ROOT_FILES and not name.startswith("."):
+                    stray.append(name)
                 continue
             case_file = latest(d, CASE_FILE_RE)
             if case_file:
                 sources.append((case_file, latest(d, ANALYSIS_FILE_RE)))
             else:
                 warnings.append(f"task directory without a '-用例-v<N>.csv' file: {name}")
+        if stray:
+            warnings.append("files that do not belong in the project directory root (only task "
+                            f"directories, {RETIRED_FILE} and {PROJECT_INFO_FILE} are allowed; "
+                            "move them into their task directory): " + "、".join(stray))
         if not sources:
             print("FAIL: no '-用例-v<N>.csv' file found in any task directory")
             print("RESULT: FAILED")
