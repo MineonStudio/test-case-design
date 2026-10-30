@@ -1,5 +1,5 @@
 name: "test-case-design"
 title: "Test case design"
-description: "Design software test cases to the user's v2 global standard: 14 scope dimensions, 8 design methods, lifelong Test001 numbering, P0 capped at 15 percent. Use when the user asks to write, extend or review test cases for any project, 编写、补充或评审测试用例时使用。"
+description: "Design software test cases from requirement docs, UI designs and API docs to the user's v2 global standard: three-source alignment with a traceability matrix, 14 fixed data fields, 14 scope dimensions, 8 design methods, lifelong Test001 numbering, P0 graded by failure consequence with a written reason. Use when the user asks to write, extend or review test cases for any project, 根据需求文档、UI 设计稿、接口文档编写、补充或评审测试用例时使用。"
 category: "Work and knowledge"
 include_in_prompt: true
